@@ -244,7 +244,8 @@ window.removeFromCart = removeFromCart;
 class PixelRunner {
     constructor() {
         this.container = document.getElementById('pixelRunner');
-        this.characters = ['🌮', '🌯', '🥙', '🫔', '🫘', '🌭', '🥗', '🥑', '🥤', '🌶️', '🎮', '👾', '🎯', '⭐', '💨'];
+        this.characters = ['🌮', '🌯', '🥙', '🫔', '🫘', '🌭', '🥗', '🥑', '🥤', '🌶️', '🎮', '🌵', '⭐', '🧀'];
+        this.hunters = ['👾']; // Characters that behave like brothers
         this.activeRunners = new Map();
         this.brothers = new Map();
         this.nextId = 0;
@@ -284,9 +285,14 @@ class PixelRunner {
     }
 
     spawnCharacter() {
-        const character = this.characters[Math.floor(Math.random() * this.characters.length)];
+        // Randomly decide if we spawn a hunter or regular character
+        const isHunter = Math.random() < 0.15; // 15% chance of hunter
+        const character = isHunter
+            ? this.hunters[Math.floor(Math.random() * this.hunters.length)]
+            : this.characters[Math.floor(Math.random() * this.characters.length)];
+
         const runner = document.createElement('div');
-        runner.className = 'runner';
+        runner.className = isHunter ? 'runner hunter' : 'runner';
         runner.textContent = character;
         runner.style.left = '-50px';
 
@@ -298,7 +304,8 @@ class PixelRunner {
         this.activeRunners.set(id, {
             element: runner,
             startTime: Date.now(),
-            duration: duration
+            duration: duration,
+            isHunter: isHunter
         });
 
         setTimeout(() => {
@@ -337,12 +344,26 @@ class PixelRunner {
     }
 
     detectCollisions() {
+        // Brothers eat regular characters
         this.brothers.forEach((brother) => {
             this.activeRunners.forEach((runner, id) => {
                 if (this.checkCollision(brother, runner.element)) {
                     this.removeRunner(id);
                 }
             });
+        });
+
+        // Hunters eat other characters (but not brothers or other hunters)
+        this.activeRunners.forEach((hunter, hunterId) => {
+            if (hunter.isHunter) {
+                this.activeRunners.forEach((prey, preyId) => {
+                    if (hunterId !== preyId && !prey.isHunter) {
+                        if (this.checkCollision(hunter.element, prey.element)) {
+                            this.removeRunner(preyId);
+                        }
+                    }
+                });
+            }
         });
     }
 

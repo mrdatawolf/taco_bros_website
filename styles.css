@@ -588,7 +588,7 @@ nav a:hover {
 
 .runner {
     position: absolute;
-    bottom: 3px;
+    bottom: -2px;
     font-size: 26px;
     filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.5));
     transition: opacity 0.3s ease;
@@ -597,6 +597,11 @@ nav a:hover {
 .runner.brother {
     font-size: 28px;
     z-index: 999;
+    bottom: -4px;
+}
+
+.runner.hunter {
+    z-index: 998;
 }
 
 
